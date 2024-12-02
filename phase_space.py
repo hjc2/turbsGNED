@@ -470,7 +470,8 @@ plt.ylabel('Roll Angle (degrees)')
 plt.title('Phase Space Diagram: Launch Angle vs. Roll Angle')
 
 # Show the plot
-plt.show()
+#plt.show()
+plt.savefig('destination_path.eps', format='eps')
 
 """## Input Recommendations
 
