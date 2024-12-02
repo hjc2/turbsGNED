@@ -345,7 +345,7 @@ disc.cd = np.array([0.81906226,0.843658724,0.848578017,0.828900846,0.811683321,0
 disc.cm = np.array([0.031216649,0.013607257,0.000266809,-0.01547492,-0.031216649,-0.046691569,-0.060565635,-0.073372465,-0.085645678,-0.095517609,-0.038247863,-0.036538462,-0.030982906,-0.027564103,-0.023504274,-0.021581197,-0.017307692,-0.014102564,-0.010042735,-0.008333333,-0.006837607,-0.008119658,-0.00982906,-0.006837607,-0.006623932,-0.004059829,-0.002350427,-0.001068376,-0.001068376,0.000641026,0.003205128,0.007478632,0.010683761,0.013461538,0.016452991,0.021153846,0.025854701,0.031410256,0.034401709,0.04017094,0.043376068,0.048931624,0.053632479,0.061111111,0.068589744,0.07542735,0.083119658,0.088888889,0.096367521,0.103846154,0.111324786,0.115811966,0.125854701,0.137820513,0.144017094,0.152564103,0.160042735,0.171794872,0.180769231,0.18974359,0.2,0.208760684,0.216239316,0.223931624,0.227991453,0.22542735,0.019871795,0.018376068,0.018162393,0.018162393,0.016452991,0.016275347,0.017609392,0.021611526,0.021611526,0.020010672,0.015741729,0.008271078,0.002401281,-0.007203842,-0.011472785])
 
 throw = Throw('Throw 1')
-throw.speed = 10
+throw.speed = 20
 throw.spin = 60*2*np.pi # Convert to rad/s
 throw.spindir = 1
 throw.launch_angle = 20*(np.pi/180) # Convert to rad
@@ -409,6 +409,9 @@ from mpl_toolkits.mplot3d import Axes3D
     roll_angle=(-45, 45, 1),
     translation_angle=(-180, 180, 1)  # New slider for translation angle
 )
+
+# this is where you put your code
+
 def update_throw(speed=35, spin=60, launch_angle=7, nose_angle=7, roll_angle=36, translation_angle=-24):
     throw.speed = speed
     throw.spin = spin * 2 * np.pi  # Convert to rad/s
@@ -459,16 +462,25 @@ def update_throw(speed=35, spin=60, launch_angle=7, nose_angle=7, roll_angle=36,
     ax.set_zlabel('Elevation (yd)', fontsize=14)
     ax.set_xlim3d(left=0)
     ax.set_zlim3d(bottom=0)
-    # max_height = np.max(z)
-    # ax.set_zlim3d(0, max_height * 1.2)  # Add 20% padding above max height
+    max_height = np.max(z)
+    ax.set_zlim3d(0, max_height * 1.2)  # Add 20% padding above max height
 
-    # ax.set_box_aspect([FIELD_LENGTH/FIELD_LENGTH,
-    #                   FIELD_WIDTH/FIELD_LENGTH,
-    #                   max_height/FIELD_LENGTH])
+    ax.set_box_aspect([FIELD_LENGTH/FIELD_LENGTH,
+                      FIELD_WIDTH/FIELD_LENGTH,
+                      max_height/FIELD_LENGTH])
 
     ax.xaxis.set_pane_color((0.3, 0.5, 0.8, 0.15))
     ax.yaxis.set_pane_color((0.3, 0.5, 0.8, 0.15))
     ax.zaxis.set_pane_color((0.3, 0.8, 0.3, 0.15))
 
     ax.view_init(elev=30, azim=-90)
-    # plt.show()
+    plt.show()
+""" ui stuff
+
+"""
+
+# update_throw(speed=40)
+
+"""# Custom UI
+
+"""

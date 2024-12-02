@@ -367,111 +367,6 @@ global TARGET_Y
 TARGET_X = 100
 TARGET_Y = 30
 
-def plotfield(ax):
-    # endzones
-    endzone_x = [0, 0, END_ZONE_LENGTH, END_ZONE_LENGTH, 0]
-    endzone_y = [0, FIELD_WIDTH, FIELD_WIDTH, 0, 0]
-    endzone_z = [0.01]*5
-    ax.plot(endzone_x, endzone_y, endzone_z, 'blue', linewidth=3)
-    endzone_x = [FIELD_LENGTH - END_ZONE_LENGTH, FIELD_LENGTH - END_ZONE_LENGTH, FIELD_LENGTH, FIELD_LENGTH, FIELD_LENGTH - END_ZONE_LENGTH]
-    endzone_y = [0, FIELD_WIDTH, FIELD_WIDTH, 0, 0]
-    endzone_z = [0.01]*5
-    ax.plot(endzone_x, endzone_y, endzone_z, 'blue', linewidth=3)
-    #sidelines
-    ax.plot([0, FIELD_LENGTH], [0, 0], [0.01, 0.01], 'red', linewidth=3)
-    ax.plot([0, FIELD_LENGTH], [FIELD_WIDTH, FIELD_WIDTH], [0.01, 0.01], 'red', linewidth=3)
-
-def plot_x_marker(ax, x_center, y_center):
-    """
-    Plots a small 'X' marker at the specified (x_center, y_center) on the ground (z=0).
-
-    Parameters:
-    - ax: The 3D axis to plot the X marker on.
-    - x_center: The x-coordinate for the center of the X.
-    - y_center: The y-coordinate for the center of the X.
-    - x_length: The length of the arms of the X (default is 2 yards).
-    - color: The color of the X (default is red).
-    """
-    # print(x_center, y_center)
-    # Coordinates for the two lines making up the "X"
-    ax.scatter(x_center, y_center, 0, color='red', s=30, marker='x')
-
-from ipywidgets import interact, widgets
-import numpy as np
-import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
-
-@interact(
-    speed=(5, 60, 0.5),
-    spin=(0, 120, 5),
-    launch_angle=(0, 45, 1),
-    nose_angle=(0, 45, 1),
-    roll_angle=(-45, 45, 1),
-    translation_angle=(-180, 180, 1)  # New slider for translation angle
-)
-def update_throw(speed=35, spin=60, launch_angle=7, nose_angle=7, roll_angle=36, translation_angle=-24):
-    throw.speed = speed
-    throw.spin = spin * 2 * np.pi  # Convert to rad/s
-    throw.launch_angle = launch_angle * (np.pi/180)  # Convert to rad
-    throw.nose_angle = nose_angle * (np.pi/180)  # Convert to rad
-    throw.roll_angle = roll_angle * (np.pi/180)  # Convert to rad
-
-    result = huckit(disc, throw)
-
-    # Convert position data from meters to yards
-    x = result.pos_g[:,0] * 3.28 / 3  # Convert to yards
-    y = result.pos_g[:,1] * 3.28 / 3  # Convert to yards
-    z = result.pos_g[:,2] * 3.28 / 3  # Convert to yards
-
-    # Apply translation rotation around the Z-axis
-    translation_angle_rad = translation_angle * (np.pi / 180)  # Convert to radians
-    x_rot = x * np.cos(translation_angle_rad) - y * np.sin(translation_angle_rad)
-    y_rot = x * np.sin(translation_angle_rad) + y * np.cos(translation_angle_rad)
-
-    # Apply the offset: move the trajectory to start at (20, 40)
-    x_rot += 20  # Shift the entire trajectory 20 yards along the x-axis
-    y_rot += 30  # Shift the entire trajectory 40 yards along the y-axis
-
-    color = throw.rot_s[:,0] * (180/np.pi)  # Convert to deg/s
-    colorMax = np.max(abs(color))
-    colorMin = -colorMax
-
-    plt.figure(figsize=(20,8))
-    ax = plt.axes(projection='3d')
-
-    # BUILD FIELD
-    plotfield(ax)
-    plot_x_marker(ax, TARGET_X, TARGET_Y)
-    # plot_x_marker(ax, 104.10466984109286, 32.25924173915902)
-
-    # PLOT OTHER STUFF
-    ax.scatter(x_rot, y_rot, z, c=color, cmap='coolwarm', vmin=colorMin, vmax=colorMax, alpha=1, s=40)
-    ax.plot(x_rot, y_rot, '-k', zdir='z', alpha=0.3)
-
-    annot = (throw.label + ' \n{:0.0f} ft ').format(throw.getDistance()*3.28)
-    ax.text(x_rot[-1], y_rot[-1], 0, annot,
-            horizontalalignment='left',
-            verticalalignment='top',
-            bbox=dict(facecolor='white', alpha=0.5))
-
-    ax.set_xlabel('Forward Travel (yd)', fontsize=14)
-    ax.set_ylabel('Lateral Travel (yd)', fontsize=14)
-    ax.set_zlabel('Elevation (yd)', fontsize=14)
-    ax.set_xlim3d(left=0)
-    ax.set_zlim3d(bottom=0)
-    # max_height = np.max(z)
-    # ax.set_zlim3d(0, max_height * 1.2)  # Add 20% padding above max height
-
-    # ax.set_box_aspect([FIELD_LENGTH/FIELD_LENGTH,
-    #                   FIELD_WIDTH/FIELD_LENGTH,
-    #                   max_height/FIELD_LENGTH])
-
-    ax.xaxis.set_pane_color((0.3, 0.5, 0.8, 0.15))
-    ax.yaxis.set_pane_color((0.3, 0.5, 0.8, 0.15))
-    ax.zaxis.set_pane_color((0.3, 0.8, 0.3, 0.15))
-
-    ax.view_init(elev=30, azim=-90)
-    # plt.show()
 
 """# New Section"""
 
@@ -498,8 +393,11 @@ y_goal = TARGET_Y
 # Prepare data to plot the phase space
 # launch_angles = np.arange(0, 45, 0.75)  # Launch angles from 0 to 45 degrees
 # roll_angles = np.arange(15, 60, 0.75)  # Roll angles from -45 to 45 degrees
-launch_angles = np.arange(15, 30, 2)  # Launch angles from 0 to 45 degrees
-roll_angles = np.arange(20, 40, 2)  # Launch angles from 0 to 45 degrees
+# launch_angles = np.arange(12, 13, 1)  # Launch angles from 0 to 45 degrees
+# roll_angles = np.arange(7, 8, 1)  # Launch angles from 0 to 45 degrees
+
+launch_angles = np.arange(0, 45, 0.75)  # Launch angles from 0 to 45 degrees
+roll_angles = np.arange(15, 60, 0.75)  # Roll angles from -45 to 45 degrees
 
 totalIter = len(launch_angles) * len(roll_angles)
 print(f"iterations {totalIter}")
@@ -510,6 +408,12 @@ print(roll_angles)
 
 # Prepare a list to store the distance results
 distance_results = []
+outdist_results = []
+
+def check_inbounds(x, y):
+  if x < 0 or x > FIELD_LENGTH or y < 0 or y > FIELD_WIDTH:
+      return False
+  return True
 
 # Loop over all combinations of launch and roll angles
 for launch_angle in launch_angles:
@@ -543,16 +447,23 @@ for launch_angle in launch_angles:
         # print(f"{distance_to_target:.2f}")
 
         # Store the result (launch angle, roll angle, distance)
-        distance_results.append((launch_angle, roll_angle, distance_to_target))
+        if(check_inbounds(x_landed, y_landed)):
+          distance_results.append((launch_angle, roll_angle, distance_to_target))
+        else:
+          outdist_results.append((launch_angle, roll_angle))
         i += 1
         print(f"iteration {i:5} / {totalIter}")
 
 # Convert results to a NumPy array for easier handling
 distance_results = np.array(distance_results)
+outdist_results = np.array(outdist_results)
 
 # Now plot the phase space diagram
 plt.figure(figsize=(5, 4))
-sc = plt.scatter(distance_results[:, 0], distance_results[:, 1], c=distance_results[:, 2], cmap='viridis', s=50, marker="s")
+if len(outdist_results) > 0:
+  sc = plt.scatter(outdist_results[:, 0], outdist_results[:, 1], color='red', s=50, marker="s")
+if len(distance_results) > 0:
+  sc = plt.scatter(distance_results[:, 0], distance_results[:, 1], c=distance_results[:, 2], cmap='viridis', s=50, marker="s")
 plt.colorbar(sc, label='Distance to Target (yards)')  # Add colorbar to represent the distance
 plt.xlabel('Launch Angle (degrees)')
 plt.ylabel('Roll Angle (degrees)')
