@@ -46,7 +46,7 @@ def T_gd(angles):
                    [-np.sin(theta),            np.sin(phi)*np.cos(theta),                                       np.cos(phi)*np.cos(theta)                                      ]])
 
 def T_dg(angles):
-  phi = angles[0]
+  phi = angles[0] 
   theta = angles[1]
   psi = angles[2]
   return np.array([[np.cos(theta)*np.cos(psi),                                      np.cos(theta)*np.sin(psi),                                      -np.sin(theta)            ],
@@ -471,7 +471,7 @@ def update_throw(speed=35, spin=60, launch_angle=7, nose_angle=7, roll_angle=36,
     ax.zaxis.set_pane_color((0.3, 0.8, 0.3, 0.15))
 
     ax.view_init(elev=30, azim=-90)
-    plt.show()
+    # plt.show()
 
 """# New Section"""
 
@@ -496,8 +496,14 @@ x_goal = TARGET_X
 y_goal = TARGET_Y
 
 # Prepare data to plot the phase space
-launch_angles = np.arange(3, 12, 0.5)  # Launch angles from 0 to 45 degrees
-roll_angles = np.arange(30, 42, 0.5)  # Roll angles from -45 to 45 degrees
+# launch_angles = np.arange(0, 45, 0.75)  # Launch angles from 0 to 45 degrees
+# roll_angles = np.arange(15, 60, 0.75)  # Roll angles from -45 to 45 degrees
+launch_angles = np.arange(15, 30, 2)  # Launch angles from 0 to 45 degrees
+roll_angles = np.arange(20, 40, 2)  # Launch angles from 0 to 45 degrees
+
+totalIter = len(launch_angles) * len(roll_angles)
+print(f"iterations {totalIter}")
+i = 0
 
 print(launch_angles)
 print(roll_angles)
@@ -538,13 +544,15 @@ for launch_angle in launch_angles:
 
         # Store the result (launch angle, roll angle, distance)
         distance_results.append((launch_angle, roll_angle, distance_to_target))
+        i += 1
+        print(f"iteration {i:5} / {totalIter}")
 
 # Convert results to a NumPy array for easier handling
 distance_results = np.array(distance_results)
 
 # Now plot the phase space diagram
 plt.figure(figsize=(5, 4))
-sc = plt.scatter(distance_results[:, 0], distance_results[:, 1], c=distance_results[:, 2], cmap='viridis', s=50)
+sc = plt.scatter(distance_results[:, 0], distance_results[:, 1], c=distance_results[:, 2], cmap='viridis', s=50, marker="s")
 plt.colorbar(sc, label='Distance to Target (yards)')  # Add colorbar to represent the distance
 plt.xlabel('Launch Angle (degrees)')
 plt.ylabel('Roll Angle (degrees)')
