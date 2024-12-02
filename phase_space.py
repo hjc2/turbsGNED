@@ -396,8 +396,8 @@ y_goal = TARGET_Y
 # launch_angles = np.arange(12, 13, 1)  # Launch angles from 0 to 45 degrees
 # roll_angles = np.arange(7, 8, 1)  # Launch angles from 0 to 45 degrees
 
-launch_angles = np.arange(0, 45, 0.75)  # Launch angles from 0 to 45 degrees
-roll_angles = np.arange(15, 60, 0.75)  # Roll angles from -45 to 45 degrees
+launch_angles = np.arange(0, 45, 0.50)  # Launch angles from 0 to 45 degrees
+roll_angles = np.arange(0, 60, 0.50)  # Roll angles from -45 to 45 degrees
 
 totalIter = len(launch_angles) * len(roll_angles)
 print(f"iterations {totalIter}")
@@ -470,8 +470,8 @@ plt.ylabel('Roll Angle (degrees)')
 plt.title('Phase Space Diagram: Launch Angle vs. Roll Angle')
 
 # Show the plot
-#plt.show()
-plt.savefig('destination_path.eps', format='eps')
+plt.show()
+#plt.savefig('destination_path.svg', format='svg')
 
 """## Input Recommendations
 
