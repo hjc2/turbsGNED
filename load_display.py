@@ -4,15 +4,15 @@ from ipywidgets import interact, widgets
 
 
 
-outdist_results = np.load('outdist.npy')
-distance_results = np.load('distance.npy')
+outdist_results = np.load('storage/outdist.npy')
+distance_results = np.load('storage/distance.npy')
 
 # Now plot the phase space diagram
 plt.figure(figsize=(5, 4))
 if len(outdist_results) > 0:
-  sc = plt.scatter(outdist_results[:, 0], outdist_results[:, 1], color='red', s=50, marker="s")
+  sc = plt.scatter(outdist_results[:, 0], outdist_results[:, 1], color='red', s=10, marker="c")
 if len(distance_results) > 0:
-  sc = plt.scatter(distance_results[:, 0], distance_results[:, 1], c=distance_results[:, 2], cmap='viridis', s=50, marker="s")
+  sc = plt.scatter(distance_results[:, 0], distance_results[:, 1], c=distance_results[:, 2], cmap='viridis', s=10, marker="c")
 
 
 print("pre results")

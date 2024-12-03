@@ -439,7 +439,7 @@ def update_throw(speed=35, spin=60, launch_angle=7, nose_angle=7, roll_angle=36,
     colorMax = np.max(abs(color))
     colorMin = -colorMax
 
-    plt.figure(figsize=(20,8))
+    plt.figure(figsize=(8,8))
     ax = plt.axes(projection='3d')
 
     # BUILD FIELD

@@ -1,5 +1,10 @@
-import matplotlib.pyplot as plt
-import ipywidgets as widgets
+import asyncio
+import numpy as np
+import h5py
+from concurrent.futures import ThreadPoolExecutor
+from dataclasses import dataclass
+from typing import List, Tuple
+
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -85,60 +90,86 @@ def check_inbounds(x, y):
       return False
   return True
 
-# Loop over all combinations of launch and roll angles
-for launch_angle in launch_angles:
-    for roll_angle in roll_angles:
-        throw.launch_angle = launch_angle * (np.pi / 180)  # Convert to rad
-        throw.nose_angle = nose_angle * (np.pi / 180)  # Convert to rad
-        throw.roll_angle = roll_angle * (np.pi / 180)  # Convert to rad
-        throw.spin = spin * 2 * np.pi  # Convert to rad/s
-        throw.speed = speed  # Set speed (constant)
+@dataclass
+class SimParams:
+    speed: float
+    spin: float
+    nose_angle: float
+    translation_angle: float
+    launch_angle: float
+    roll_angle: float
+    
+async def simulate_throw(params: SimParams, disc, throw) -> Tuple[float, float, float, float, float]:
+    loop = asyncio.get_event_loop()
+    with ThreadPoolExecutor() as pool:
+        result = await loop.run_in_executor(pool, huckit, disc, throw)
+        
+        x = result.pos_g[:,0] * 3.28 / 3
+        y = result.pos_g[:,1] * 3.28 / 3
+        z = result.pos_g[:,2] * 3.28 / 3
 
-        # Simulate the throw
-        result = huckit(disc, throw)
-
-        # Convert the final position to yards
-        x = result.pos_g[:,0] * 3.28 / 3  # Convert to yards
-        y = result.pos_g[:,1] * 3.28 / 3  # Convert to yards
-        z = result.pos_g[:,2] * 3.28 / 3  # Convert to yards
-
+        rotation_angle_rad = -1 * np.radians(params.translation_angle)
         x_trans = x * np.cos(rotation_angle_rad) - y * np.sin(rotation_angle_rad)
         y_trans = x * np.sin(rotation_angle_rad) + y * np.cos(rotation_angle_rad)
 
-        # Apply translation to the trajectory (start at (20, 30))
         x_rot = x_trans + 20
         y_rot = y_trans + 30
 
-        # Calculate the final position
-        x_landed, y_landed, z_landed = x_rot[-1], y_rot[-1], z[-1]
+        return x_rot[-1], y_rot[-1], z[-1], params.launch_angle, params.roll_angle
 
-        # Compute the distance from the target
-        distance_to_target = np.sqrt((x_landed - x_goal) ** 2 + (y_landed - y_goal) ** 2)
-        # print(f"{distance_to_target:.2f}")
+async def process_batch(params_list: List[SimParams], disc, throw, chunk_size=100):
+    tasks = []
+    results = []
+    
+    for i in range(0, len(params_list), chunk_size):
+        chunk = params_list[i:i + chunk_size]
+        chunk_tasks = [simulate_throw(p, disc, throw) for p in chunk]
+        chunk_results = await asyncio.gather(*chunk_tasks)
+        results.extend(chunk_results)
+        
+        print(f"Processed {len(results)}/{len(params_list)} simulations")
+        
+    return results
 
-        # Store the result (launch angle, roll angle, distance)
-        if(check_inbounds(x_landed, y_landed)):
-          distance_results.append((launch_angle, roll_angle, distance_to_target))
+async def main():
+    # Your existing parameters
+    params_list = [
+        SimParams(
+            speed=speed,
+            spin=spin,
+            nose_angle=nose_angle,
+            translation_angle=translation_angle,
+            launch_angle=la,
+            roll_angle=ra
+        )
+        for la in launch_angles
+        for ra in roll_angles
+    ]
+
+    results = await process_batch(params_list, disc, throw)
+
+    distance_results = []
+    outdist_results = []
+    
+    for x, y, z, la, ra in results:
+        if check_inbounds(x, y):
+            dist = np.sqrt((x - TARGET_X)**2 + (y - TARGET_Y)**2)
+            distance_results.append((la, ra, dist))
         else:
-          outdist_results.append((launch_angle, roll_angle))
-        i += 1
-        print(f"iteration {i:5} / {totalIter}")
+            outdist_results.append((la, ra))
 
-# Convert results to a NumPy array for easier handling
-distance_results = np.array(distance_results)
-outdist_results = np.array(outdist_results)
+    # Save results
+    np.save('distance.npy', np.array(distance_results))
+    np.save('outdist.npy', np.array(outdist_results))
+    
+    return np.array(distance_results), np.array(outdist_results)
 
-# Now plot the phase space diagram
-plt.figure(figsize=(5, 4))
-if len(outdist_results) > 0:
-  sc = plt.scatter(outdist_results[:, 0], outdist_results[:, 1], color='red', s=50, marker="s")
-if len(distance_results) > 0:
-  sc = plt.scatter(distance_results[:, 0], distance_results[:, 1], c=distance_results[:, 2], cmap='viridis', s=50, marker="s")
-
-
-print("pre results")
-print(outdist_results)
-print(distance_results)
-
-np.save('outdist.npy', outdist_results) # save
-np.save('distance.npy', distance_results) # save
+if __name__ == "__main__":
+    distance_results, outdist_results = asyncio.run(main())
+    
+    plt.figure(figsize=(5, 4))
+    if len(outdist_results) > 0:
+        plt.scatter(outdist_results[:, 0], outdist_results[:, 1], color='red', s=50, marker="s")
+    if len(distance_results) > 0:
+        plt.scatter(distance_results[:, 0], distance_results[:, 1], 
+                   c=distance_results[:, 2], cmap='viridis', s=50, marker="s")
