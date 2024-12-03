@@ -64,13 +64,15 @@ x_goal = TARGET_X
 y_goal = TARGET_Y
 
 # Prepare data to plot the phase space
-launch_angles = np.arange(0, 45, 0.75)  # Launch angles from 0 to 45 degrees
-roll_angles = np.arange(15, 60, 0.75)  # Roll angles from -45 to 45 degrees
-#launch_angles = np.arange(10, 11, 1)  # Launch angles from 0 to 45 degrees
-#roll_angles = np.arange(30, 31, 1)  # Launch angles from 0 to 45 degrees
+# launch_angles = np.arange(0, 45, 0.75)  # Launch angles from 0 to 45 degrees
+# roll_angles = np.arange(15, 60, 0.75)  # Roll angles from -45 to 45 degrees
+# launch_angles = np.arange(10, 11, 1)  # Launch angles from 0 to 45 degrees
+# roll_angles = np.arange(30, 31, 1)  # Launch angles from 0 to 45 degrees
 
 # launch_angles = np.arange(0, 45, 0.50)  # Launch angles from 0 to 45 degrees
 # roll_angles = np.arange(0, 60, 0.50)  # Roll angles from -45 to 45 degrees
+launch_angles = np.arange(0, 45, 5)  # Launch angles from 0 to 45 degrees
+roll_angles = np.arange(15, 60, 5) 
 
 totalIter = len(launch_angles) * len(roll_angles)
 print(f"iterations {totalIter}")
@@ -98,24 +100,35 @@ class SimParams:
     roll_angle: float
     
 async def simulate_throw(params: SimParams, disc, throw) -> Tuple[float, float, float, float, float]:
+    # Set throw parameters from SimParams
+    throw.launch_angle = params.launch_angle * (np.pi / 180)
+    throw.nose_angle = params.nose_angle * (np.pi / 180)
+    throw.roll_angle = params.roll_angle * (np.pi / 180)
+    throw.spin = params.spin * 2 * np.pi
+    throw.speed = params.speed
+    
     loop = asyncio.get_event_loop()
     with ThreadPoolExecutor() as pool:
-        result = await loop.run_in_executor(pool, huckit, disc, throw)
-        
-        x = result.pos_g[:,0] * 3.28 / 3
-        y = result.pos_g[:,1] * 3.28 / 3
-        z = result.pos_g[:,2] * 3.28 / 3
+        try:
+            result = await loop.run_in_executor(pool, huckit, disc, throw)
+            
+            x = result.pos_g[:,0] * 3.28 / 3
+            y = result.pos_g[:,1] * 3.28 / 3
+            z = result.pos_g[:,2] * 3.28 / 3
 
-        rotation_angle_rad = -1 * np.radians(params.translation_angle)
-        x_trans = x * np.cos(rotation_angle_rad) - y * np.sin(rotation_angle_rad)
-        y_trans = x * np.sin(rotation_angle_rad) + y * np.cos(rotation_angle_rad)
+            x_trans = x * np.cos(rotation_angle_rad) - y * np.sin(rotation_angle_rad)
+            y_trans = x * np.sin(rotation_angle_rad) + y * np.cos(rotation_angle_rad)
 
-        x_rot = x_trans + 20
-        y_rot = y_trans + 30
+            x_rot = x_trans + 20
+            y_rot = y_trans + 30
 
-        return x_rot[-1], y_rot[-1], z[-1], params.launch_angle, params.roll_angle
+            print(f"Debug - x: {x_rot[-1]}, y: {y_rot[-1]}, z: {z[-1]}, la: {params.launch_angle}, ra: {params.roll_angle}")
+            return x_rot[-1], y_rot[-1], z[-1], params.launch_angle, params.roll_angle
+        except Exception as e:
+            print(f"Error in simulate_throw: {e}")
+            return None
 
-async def process_batch(params_list: List[SimParams], disc, throw, chunk_size=100):
+async def process_batch(params_list: List[SimParams], disc, throw, chunk_size=5):
     tasks = []
     results = []
     
@@ -165,9 +178,3 @@ async def main():
 if __name__ == "__main__":
     distance_results, outdist_results = asyncio.run(main())
     
-   # plt.figure(figsize=(5, 4))
-   # if len(outdist_results) > 0:
-    #    plt.scatter(outdist_results[:, 0], outdist_results[:, 1], color='red', s=50, marker="s")
-   # if len(distance_results) > 0:
-  #      plt.scatter(distance_results[:, 0], distance_results[:, 1], 
- #                  c=distance_results[:, 2], cmap='viridis', s=50, marker="s")
