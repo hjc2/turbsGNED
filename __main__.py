@@ -8,10 +8,8 @@ from typing import List, Tuple
 
 import numpy as np
 import matplotlib.pyplot as plt
-from ipywidgets import interact, widgets
 from base import Disc, Throw, huckit
 
-fig1Output = widgets.Output()
 
 # import base.Disc as Disc
 
@@ -66,10 +64,10 @@ x_goal = TARGET_X
 y_goal = TARGET_Y
 
 # Prepare data to plot the phase space
-# launch_angles = np.arange(0, 45, 0.75)  # Launch angles from 0 to 45 degrees
-# roll_angles = np.arange(15, 60, 0.75)  # Roll angles from -45 to 45 degrees
-launch_angles = np.arange(10, 11, 1)  # Launch angles from 0 to 45 degrees
-roll_angles = np.arange(30, 31, 1)  # Launch angles from 0 to 45 degrees
+launch_angles = np.arange(0, 45, 0.75)  # Launch angles from 0 to 45 degrees
+roll_angles = np.arange(15, 60, 0.75)  # Roll angles from -45 to 45 degrees
+#launch_angles = np.arange(10, 11, 1)  # Launch angles from 0 to 45 degrees
+#roll_angles = np.arange(30, 31, 1)  # Launch angles from 0 to 45 degrees
 
 # launch_angles = np.arange(0, 45, 0.50)  # Launch angles from 0 to 45 degrees
 # roll_angles = np.arange(0, 60, 0.50)  # Roll angles from -45 to 45 degrees
@@ -167,9 +165,9 @@ async def main():
 if __name__ == "__main__":
     distance_results, outdist_results = asyncio.run(main())
     
-    plt.figure(figsize=(5, 4))
-    if len(outdist_results) > 0:
-        plt.scatter(outdist_results[:, 0], outdist_results[:, 1], color='red', s=50, marker="s")
-    if len(distance_results) > 0:
-        plt.scatter(distance_results[:, 0], distance_results[:, 1], 
-                   c=distance_results[:, 2], cmap='viridis', s=50, marker="s")
+   # plt.figure(figsize=(5, 4))
+   # if len(outdist_results) > 0:
+    #    plt.scatter(outdist_results[:, 0], outdist_results[:, 1], color='red', s=50, marker="s")
+   # if len(distance_results) > 0:
+  #      plt.scatter(distance_results[:, 0], distance_results[:, 1], 
+ #                  c=distance_results[:, 2], cmap='viridis', s=50, marker="s")
