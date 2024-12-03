@@ -329,9 +329,7 @@ def huckit(disc, throw):
 """
 
 import matplotlib.pyplot as plt
-import ipywidgets as widgets
 
-fig1Output = widgets.Output()
 
 
 disc = Disc("Frisbee")
@@ -372,7 +370,6 @@ TARGET_Y = 30
 
 import numpy as np
 import matplotlib.pyplot as plt
-from ipywidgets import interact, widgets
 
 # Keep all other parameters fixed
 speed = 35
