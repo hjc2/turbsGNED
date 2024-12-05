@@ -71,8 +71,8 @@ y_goal = TARGET_Y
 
 # launch_angles = np.arange(0, 45, 0.50)  # Launch angles from 0 to 45 degrees
 # roll_angles = np.arange(0, 60, 0.50)  # Roll angles from -45 to 45 degrees
-launch_angles = np.arange(0, 45, 5)  # Launch angles from 0 to 45 degrees
-roll_angles = np.arange(15, 60, 5) 
+launch_angles = np.arange(0, 45, 2)  # Launch angles from 0 to 45 degrees
+roll_angles = np.arange(15, 60, 2) 
 
 totalIter = len(launch_angles) * len(roll_angles)
 print(f"iterations {totalIter}")
@@ -128,7 +128,7 @@ async def simulate_throw(params: SimParams, disc, throw) -> Tuple[float, float, 
             print(f"Error in simulate_throw: {e}")
             return None
 
-async def process_batch(params_list: List[SimParams], disc, throw, chunk_size=5):
+async def process_batch(params_list: List[SimParams], disc, throw, chunk_size=1):
     tasks = []
     results = []
     
