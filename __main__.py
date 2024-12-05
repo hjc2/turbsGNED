@@ -71,8 +71,8 @@ y_goal = TARGET_Y
 
 # launch_angles = np.arange(0, 45, 0.50)  # Launch angles from 0 to 45 degrees
 # roll_angles = np.arange(0, 60, 0.50)  # Roll angles from -45 to 45 degrees
-launch_angles = np.arange(0, 45,5)  # Launch angles from 0 to 45 degrees
-roll_angles = np.arange(15, 60, 5) 
+launch_angles = np.arange(0, 45,1)  # Launch angles from 0 to 45 degrees
+roll_angles = np.arange(0, 60, 1) 
 
 totalIter = len(launch_angles) * len(roll_angles)
 print(f"iterations {totalIter}")
